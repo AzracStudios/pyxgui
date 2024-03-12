@@ -1,0 +1,11 @@
+[project]
+name="pyXgui"
+version="3.0.24"
+requires-python = ">= 3.8"
+readme="README.md"
+authors = [
+  {name = "Adarsh Ravikumar", email = "azracstudios@gmail.com"}
+]
+
+[tool.pyink]
+pyink-indentation=2
