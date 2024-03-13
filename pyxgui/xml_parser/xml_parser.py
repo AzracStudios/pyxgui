@@ -71,8 +71,28 @@ class Parser:
 
     return children
 
+  def parse_inner_text(self):
+    inner_text = ""
+    while True:
+      if self.current_token.type == const.TT_WORD:
+        inner_text += self.current_token.value
+      elif self.current_token.type == const.TT_SPACE:
+        inner_text += " "
+      elif self.current_token.type == const.TT_NUMBER:
+        inner_text += str(self.current_token.value)
+      else:
+        break
+
+      self.advance()
+
+    return inner_text
+
   def parse_tag(self, parent: XMLNode | None) -> XMLNode:
     node: XMLNode = XMLNode(parent)
+
+    # inline_tag: LANGLE WORD (WORD EQL (STRING|NUMBER))?* FWDSLSH RANGLE
+    #####
+    # tag: LANGLE WORD (WORD EQL (STRING|NUMBER))?* RANGLE (tag?*) LANGLE FWDSLSH WORD RANGLE
 
     # beginning of tag
     if self.current_token.type != const.TT_LANGLE:
@@ -113,18 +133,7 @@ class Parser:
     self.skip([const.TT_SPACE, const.TT_NL])
 
     # parse inner text
-    while True:
-      if self.current_token.type == const.TT_WORD:
-        node.inner_text += self.current_token.value
-      elif self.current_token.type == const.TT_SPACE:
-        node.inner_text += " "
-      elif self.current_token.type == const.TT_NUMBER:
-        node.inner_text += str(self.current_token.value)
-      else:
-        break
-
-      self.advance()
-
+    node.inner_text = self.parse_inner_text()
     self.skip([const.TT_SPACE, const.TT_NL])
 
     if self.current_token.type == const.TT_LANGLE:
