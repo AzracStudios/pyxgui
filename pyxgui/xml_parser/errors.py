@@ -1,4 +1,4 @@
-from pyxgui.xml_parser.position import Position
+from pyxgui.xml_parser.structs import Position, Token
 from pyxgui.utils.colors import Colors
 
 
@@ -66,8 +66,8 @@ class Error:
 
       else:
         line_colored = Colors.white(line[0:col_start])
-        line_colored += Colors.bright_white(line[col_start:col_end+1])
-        line_colored += Colors.bright_black(line[col_end+1:len(line)])
+        line_colored += Colors.bright_white(line[col_start : col_end + 1])
+        line_colored += Colors.bright_black(line[col_end + 1 : len(line)])
         line = line_colored
 
         result += Colors.bright_black(line_number) + line + "\n"
@@ -85,11 +85,17 @@ class Error:
 
 class ParserError(Error):
 
-  def __init__(self, msg: str, src: str, start_pos: Position, end_pos: Position):
+  def __init__(self, msg: str, token: Token):
     super().__init__(
         msg,
-        src,
-        start_pos,
-        end_pos,
+        token.start_pos.fsrc,
+        token.start_pos,
+        token.end_pos,
         "Parser Error",
     )
+
+
+class LexerError(Error):
+
+  def __init__(self, msg: str, src: str, start_pos: Position, end_pos: Position):
+    super().__init__(msg, src, start_pos, end_pos, "Lexer Error")

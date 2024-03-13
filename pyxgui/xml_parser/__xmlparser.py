@@ -1,8 +1,6 @@
 import os
 from pyxgui.utils.colors import Colors
-from pyxgui.xml_parser.xmldoc import XMLDocument
-from pyxgui.xml_parser.xmlnode import XMLNode
-from pyxgui.xml_parser.position import Position
+from pyxgui.xml_parser.structs import XMLDocument, XMLNode, Position, XMLAttribute
 from pyxgui.xml_parser.errors import ParserError
 
 
@@ -41,6 +39,7 @@ class XMLParser:
 
     self.current_char = None
 
+
   def _peek_character(self, peek_by: int) -> str | None:
     if (i := self.position.idx + peek_by) < len(self.document.source):
       return self.document.source[i]
@@ -51,9 +50,16 @@ class XMLParser:
       self._advance()
 
     return None
+  
+  def _skip_spaces(self) -> None:
+    while self.current_char in "\t ":
+      self._advance()
+
+    return None
 
   def generate_xml_tree(self) -> None:
     current_node: XMLNode | None = None
+    current_attribute: XMLAttribute | None = XMLAttribute()
     lexical_buffer: str = ""
 
     while self.current_char is not None:
@@ -112,19 +118,35 @@ class XMLParser:
           current_node = XMLNode(current_node)
 
         # BEGINNING OF A TAG
+        attributes: list[XMLAttribute] = []
         self._advance()
 
-        ## SCAN TAG NAME
         while self.current_char != ">":
+          ## SCAN TAG NAME
           lexical_buffer += self.current_char
           self._advance()
 
-        current_node.tag = lexical_buffer
-        lexical_buffer = ""
+          ## SET TAG NAME
+          if self.current_char == " " and not current_node.tag:
+            current_node.tag = lexical_buffer
+            lexical_buffer = ""
 
-        self._advance()
-        continue
+            self._advance()
+            continue
 
+          self._skip_spaces()
+
+          ## ATTRIBUTE KEY
+          if self.current_char == "=":
+            current_attribute.key = lexical_buffer
+            lexical_buffer = ""
+
+          ## ATTRIBUTE VALUE
+          if self.current_char in "'\"":
+            if not current_attribute.key:
+              return None
+
+          
       else:
         lexical_buffer += self.current_char
         self._advance()

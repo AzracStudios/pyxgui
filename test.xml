@@ -1,1 +1,25 @@
-<text> Hello world!! </text>
+<frame>
+  <Carousel>
+    <Banner class="banner1">
+      <text class="title">Hello world!</text>
+      <text class="subtitle">This is some text on banner 1</text>
+      <button class="clicker">Click Me!</button>
+    </Banner>
+    <Banner class="banner2">
+      <text class="title">This is fun!</text>
+      <text class="subtitle">Really fun!</text>
+      <button class="clicker">Click Me!</button>
+    </Banner>
+    <Banner class="banner3">
+      <text class="title">Bye world!</text>
+      <text class="subtitle">See ya on the other side!</text>
+      <button class="clicker">Click Me!</button>
+    </Banner>
+  </Carousel>
+  
+  <flex>
+    <Card name="Entity 1" image="/image/path/1" price=123.0/>
+    <Card name="Entity 2" image="/image/path/2" price=35.0/>
+    <Card name="Entity 3" image="/image/path/3" price=25.99/>
+  </flex>
+</frame>
