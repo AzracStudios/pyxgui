@@ -1,15 +1,16 @@
-from pyxgui.xml_parser.errors import Error, LexerError
-from pyxgui.xml_parser.structs import Position, Token
-import pyxgui.xml_parser.constants as const
+from pyxgui.wtree_gen.structs import Token, Position
+import pyxgui.wtree_gen.constants as const
+from pyxgui.wtree_gen.error import Error, LexerError
 
 
 class Lexer:
 
-  def __init__(self, source: str) -> None:
+  def __init__(self, source: str, generate_next_token) -> None:
     self.source: str = source
     self.current_char: str | None = None
     self.position: Position = Position(-1, -1, 1, self.source)
     self.advance()
+    self.generate_next_token = generate_next_token
 
   def advance(self) -> None:
     self.position.advance(char=self.current_char)
@@ -22,7 +23,7 @@ class Lexer:
     return None
 
   def revert(self) -> None:
-    self.position.revert(char=self.current_char)
+    self.position.revert()
 
     if (i := self.position.idx) > 0:
       self.current_char = self.source[i]
@@ -78,45 +79,6 @@ class Lexer:
         end_pos=self.position.copy(),
     )
 
-  def lex_word(self) -> Token:
-    word: str = ""
-    start_pos: Position = self.position.copy()
-
-    while self.current_char not in " \t\n<>/=":
-      word += self.current_char
-      self.advance()
-
-    self.revert()
-    return Token(
-        const.TT_WORD, start_pos, value=word, end_pos=self.position.copy().advance()
-    )
-
-  def generate_next_token(self) -> Token | Error:
-    if self.current_char in "\t ":
-      return Token(const.TT_SPACE, self.position.copy())
-
-    if self.current_char == "\n":
-      return Token(const.TT_NL, self.position.copy())
-
-    if self.current_char == "<":
-      return Token(const.TT_LANGLE, self.position.copy())
-
-    if self.current_char == ">":
-      return Token(const.TT_RANGLE, self.position.copy())
-
-    if self.current_char == "/":
-      return Token(const.TT_FWDSLSH, self.position.copy())
-
-    if self.current_char == "=":
-      return Token(const.TT_EQL, self.position.copy())
-
-    if self.current_char in "\"'":
-      return self.lex_string()
-
-    if self.current_char in const.NUMS + ".":
-      return self.lex_number()
-
-    return self.lex_word()
 
   def tokenize(self) -> list[Token] | None:
     tokens = []

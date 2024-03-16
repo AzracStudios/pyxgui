@@ -1,4 +1,4 @@
-from pyxgui.xml_parser.structs import Position, Token
+from pyxgui.wtree_gen.structs import Position, Token, XMLNode
 from pyxgui.utils.colors import Colors
 
 
@@ -60,6 +60,18 @@ class Error:
       col_start: int = self.start_pos.col if i == 0 else 0
       col_end: int = self.end_pos.col if i == line_count - 1 else len(line) - 1
 
+      # print the line previous to where the error starts
+      if self.start_pos.ln > 1 and i == 0:
+        prev_line_start = max(self.src.rfind("\n", 0, idx_start), 0)
+        prev_line_end = max(self.src.find("\n", prev_line_start + 1), 0)
+        prev_line = self.src[prev_line_start:prev_line_end].replace("\n", "")
+        if prev_line.replace(" ", "") != "":  
+          result += (
+              Colors.bright_black(f"{self.start_pos.ln + i - 1}{spaces_str}| ")
+              + self.src[prev_line_start:prev_line_end].replace("\n", "")
+              + "\n"
+          )
+
       if self.end_pos.ln < self.start_pos.ln + i:
         line = f"{Colors.bright_black(line)}"
         result += Colors.bright_black(line_number) + line + "\n"
@@ -99,3 +111,15 @@ class LexerError(Error):
 
   def __init__(self, msg: str, src: str, start_pos: Position, end_pos: Position):
     super().__init__(msg, src, start_pos, end_pos, "Lexer Error")
+
+
+class WidgetError(Error):
+
+  def __init__(self, msg: str, node: XMLNode):
+    super().__init__(
+        msg,
+        node.start_pos.fsrc,
+        node.start_pos,
+        node.end_pos,
+        "Widget Error",
+    )

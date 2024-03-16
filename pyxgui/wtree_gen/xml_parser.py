@@ -1,33 +1,11 @@
-from pyxgui.xml_parser.structs import Token, XMLAttribute, XMLNode
-from pyxgui.xml_parser.errors import Error, ParserError
-import pyxgui.xml_parser.constants as const
+from pyxgui.wtree_gen.parser_base import *
+from pyxgui.wtree_gen.structs import XMLAttribute, XMLNode
 
 
-class Parser:
+class XMLParser(Parser):
 
   def __init__(self, source: str, tokens: list[Token]):
-    self.tokens = tokens
-    self.current_token: Token | None = None
-    self.source = source
-    self.tok_idx = -1
-    self.advance()
-
-  def advance(self, advance_by: int = 1) -> None:
-    self.tok_idx += advance_by
-    if self.tok_idx < len(self.tokens):
-      self.current_token = self.tokens[self.tok_idx]
-
-    return None
-
-  def peek_tokens(self, peek_by: int) -> Token | None:
-    if (i := self.tok_idx + peek_by) < len(self.tokens):
-      return self.tokens[i]
-    return None
-
-  def skip(self, to_skip: list[str]) -> None:
-    while self.current_token.type in to_skip:
-      self.advance()
-    return None
+    super().__init__(source, tokens)
 
   def parse_attributes(self) -> XMLAttribute:
     current_attrib = XMLAttribute()
@@ -87,7 +65,7 @@ class Parser:
 
     return inner_text
 
-  def parse_tag(self, parent: XMLNode | None) -> XMLNode:
+  def parse_tag(self, parent: XMLNode | None) -> XMLNode | Error:
     node: XMLNode = XMLNode(parent)
 
     # inline_tag: LANGLE WORD (WORD EQL (STRING|NUMBER))?* FWDSLSH RANGLE
@@ -98,6 +76,7 @@ class Parser:
     if self.current_token.type != const.TT_LANGLE:
       return ParserError("Expected '<'", self.current_token)
 
+    node.start_pos = self.current_token.start_pos.copy()
     self.advance()
 
     # tag name
@@ -123,6 +102,7 @@ class Parser:
         and self.peek_tokens(1).type == const.TT_RANGLE
     ):
       self.advance(2)
+      node.end_pos = self.current_token.start_pos.copy()
       self.skip([const.TT_SPACE, const.TT_NL])
       return node
 
@@ -161,6 +141,24 @@ class Parser:
         return ParserError("Expected '>'", self.current_token)
 
       self.advance()
+      node.end_pos = self.current_token.start_pos.copy()
+
       self.skip([const.TT_SPACE, const.TT_NL])
 
       return node
+
+  def parse(self) -> XMLNode | Error:
+    tag = self.parse_tag(None)
+
+    if self.current_token.type != const.TT_EOF:
+      err = ParserError(
+          "Document must contain only one root widget", self.current_token
+      )
+      print(err.generate_error_text())
+      return None
+
+    if isinstance(tag, Error):
+      print(tag.generate_error_text())
+      return None
+
+    return tag

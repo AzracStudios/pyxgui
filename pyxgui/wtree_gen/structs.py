@@ -19,13 +19,9 @@ class Position:
 
     return self
 
-  def revert(self, char: str | None = None) -> Position:
+  def revert(self) -> Position:
     self.idx -= 1
     self.col -= 1
-
-    if char == "\n":
-      self.ln -= 1
-      self.col += 1
 
   def copy(self) -> Position:
     return Position(self.idx, self.col, self.ln, self.fsrc)
@@ -73,6 +69,8 @@ class XMLNode:
     self.parent = parent
     self.attributes: list[XMLAttribute] = []
     self.children: list[XMLNode] = []
+    self.start_pos: Position = None
+    self.end_pos: Position = None
 
   def __repr__(self) -> str:
     return f"{self.tag}: {self.inner_text}" + (

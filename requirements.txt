@@ -1,3 +1,5 @@
 pyink
 wheel
-setuptools
+setuptool
+raylib
+pyautogui
