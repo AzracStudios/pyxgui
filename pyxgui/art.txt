@@ -1,0 +1,7 @@
+\u001b[37;1m
+    +o      o+  o+     
+  o+       +o     +o   
+o+        o+        +o   pyXgui v$
+  o+     +o       +o   
+    o+  o+     +o 
+\u001b[0m
