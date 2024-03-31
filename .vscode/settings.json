@@ -10,4 +10,5 @@
   "black-formatter.path": [
       ".venv/bin/pyink"
   ],
+  "python.REPL.enableREPLSmartSend": false,
 }

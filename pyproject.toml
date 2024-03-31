@@ -20,7 +20,7 @@ pyink = "^24.3.0"
 
 [tool.pytest.ini_options]
 minversion = "6.0"
-addopts = "--no-header -vv --import-mode=importlib" 
+addopts = "--no-header -v" 
 
 testpaths = [
     "tests",
